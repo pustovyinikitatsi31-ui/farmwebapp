@@ -1,0 +1,57 @@
+/* Green Farm — єдина таблиця стилів */
+:root{--green:#2f7d32;--green-dark:#1f5c23;--green-soft:#e8f5e9;--text:#1c2b1d;--white:#fff;--radius:10px}
+*,*::before,*::after{box-sizing:border-box}
+html{font-size:100%}
+body{margin:0;font-family:"Times New Roman",Tinos,Times,serif;font-size:1.125rem;line-height:1.65;color:var(--text);background:var(--white)}
+.container{width:100%;max-width:1100px;margin:0 auto;padding:0 1rem}
+h1,h2,h3,h4{line-height:1.25;margin:1.6rem 0 .6rem}
+h1{font-size:2rem}h2{font-size:1.5rem}h3{font-size:1.25rem}h4{font-size:1.125rem}
+p{margin:0 0 1rem;max-width:70ch}
+a{color:var(--green-dark)}
+img{max-width:100%;height:auto;display:block}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+/* header / footer */
+.site-header{border-bottom:3px solid var(--green);background:var(--white)}
+.site-header .container{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding-top:.8rem;padding-bottom:.8rem}
+.logo{font-size:1.6rem;font-weight:700;color:var(--green);text-decoration:none}
+nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:.25rem .5rem}
+nav a{display:block;padding:.35rem .75rem;border-radius:var(--radius);text-decoration:none;color:var(--text)}
+nav a:hover{background:var(--green-soft);color:var(--green-dark)}
+.site-footer{margin-top:3rem;border-top:3px solid var(--green);background:var(--white);text-align:center;padding:1.2rem 0;font-size:1rem}
+.site-footer p{margin:.2rem auto}
+main{padding-top:1rem;min-height:60vh}
+/* buttons */
+.btn,button{display:inline-block;margin-top:.8rem;padding:.65rem 1.4rem;background:var(--green);color:var(--white);border:0;border-radius:var(--radius);font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+.btn:hover,button:hover{background:var(--green-dark)}
+.btn-light{background:var(--white);color:var(--green-dark)}
+.btn-light:hover{background:var(--green-soft)}
+/* cards */
+.grid{display:grid;grid-template-columns:1fr;gap:1.2rem;margin:1.2rem 0}
+.card{background:var(--green);color:var(--white);border-radius:var(--radius);padding:1rem;overflow:hidden}
+.card h2,.card h3,.card h4{margin-top:.8rem;color:var(--white)}
+.card p{margin-bottom:.4rem}
+.card img{border-radius:6px;background:var(--white);width:100%}
+/* hero */
+.hero{text-align:center;padding:2.5rem 1rem;border:2px solid var(--green);border-radius:var(--radius);margin-top:1rem}
+.hero h1{margin-top:0}
+.hero p{margin-left:auto;margin-right:auto}
+/* product */
+.intro{display:grid;gap:1rem;align-items:center}
+.intro img{border-radius:var(--radius);border:2px solid var(--green)}
+.back{margin-top:1.5rem}
+/* form */
+form label{display:block;margin-top:.9rem;font-weight:700}
+input,select,textarea{width:100%;padding:.6rem;margin-top:.3rem;font:inherit;border:2px solid var(--green);border-radius:6px;background:var(--white)}
+#message{margin-top:1rem;color:var(--green-dark);font-weight:700}
+.text{max-width:680px;margin:0 auto}
+/* tablet */
+@media (min-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
+/* desktop */
+@media (min-width:992px){
+ h1{font-size:2.5rem}
+ .site-header .container{flex-direction:row;justify-content:space-between}
+ .grid{grid-template-columns:repeat(3,1fr)}
+ .intro{grid-template-columns:1fr 1fr}
+ .hero{padding:4rem 2rem}
+}
+@media (prefers-reduced-motion:no-preference){.btn,button,nav a{transition:background-color .2s}}
