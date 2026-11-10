@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Замовлення | Green Farm</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&amp;display=swap">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Замовлення | Green Farm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <header class="site-header">
@@ -19,105 +19,71 @@
         <li><a href="catalog.html">Продукція</a></li>
         <li><a href="cheese.html">Домашній сир</a></li>
         <li><a href="about.html">Про нас</a></li>
-        <li><a href="order.html">Замовлення</a></li>
+        <li><a href="order.html" aria-current="page">Замовлення</a></li>
+        <li><a href="register.html">Реєстрація</a></li>
       </ul>
     </nav>
   </div>
 </header>
+
 <main class="container">
-<section class="text"><h1>Замовлення фермерської продукції</h1><form id="orderForm">
+  <section class="text">
+    <h1>Замовлення фермерської продукції</h1>
 
-    <label for="name">Ім'я:</label>
-    <input
-        type="text"
-        id="name"
-        name="name"
-        required
-        minlength="2"
-        placeholder="Введіть ваше ім'я">
+    <form id="orderForm" action="#" method="post">
+      <label for="name">Ім'я:</label>
+      <input type="text" id="name" name="name" required minlength="2" placeholder="Введіть ваше ім'я">
 
-    <label for="phone">Телефон:</label>
-    <input
-        type="tel"
-        id="phone"
-        name="phone"
-        required
-        pattern="[0-9]{10,13}"
-        placeholder="380XXXXXXXXX">
+      <label for="phone">Телефон:</label>
+      <input type="tel" id="phone" name="phone" required pattern="[0-9]{10,13}" placeholder="380XXXXXXXXX">
 
-    <label for="email">Email:</label>
-    <input
-        type="email"
-        id="email"
-        name="email"
-        required
-        placeholder="example@gmail.com">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required placeholder="example@gmail.com">
+
       <label for="address">Адреса доставки:</label>
-<input
-    type="text"
-    id="address"
-    name="address"
-    required
-    minlength="10"
-    placeholder="Місто, вулиця, будинок, квартира">
+      <input type="text" id="address" name="address" required minlength="10" placeholder="Місто, вулиця, будинок, квартира">
 
-    <label for="product">Оберіть продукцію:</label>
-    <select id="product" name="product" required>
+      <label for="product">Оберіть продукцію:</label>
+      <select id="product" name="product" required>
         <option value="">-- Оберіть товар --</option>
-        <option>Овочі</option>
-        <option>Фрукти</option>
-        <option>Молоко</option>
-        <option>Яйця</option>
-        <option>Мед</option>
-    </select>
+        <option value="1">Фермерське молоко — 40 грн</option>
+        <option value="2">Домашній сир — 180 грн</option>
+        <option value="3">Натуральний мед — 250 грн</option>
+        <option value="4">Домашні яйця — 70 грн</option>
+        <option value="5">Органічні помідори — 90 грн</option>
+        <option value="6">Садові яблука — 35 грн</option>
+      </select>
 
-    <label for="quantity">Кількість:</label>
-    <input
-        type="number"
-        id="quantity"
-        name="quantity"
-        required
-        min="1"
-        max="100">
+      <label for="quantity">Кількість:</label>
+      <input type="number" id="quantity" name="quantity" required min="1" max="100" value="1">
 
-    <label for="date">Бажана дата отримання:</label>
-    <input
-        type="date"
-        id="date"
-        name="date"
-        required>
+      <label for="date">Бажана дата отримання:</label>
+      <input type="date" id="date" name="date" required>
 
-    <label for="comment">Коментар:</label>
-    <textarea
-        id="comment"
-        name="comment"
-        rows="4"
-        maxlength="300"
-        placeholder="Додаткові побажання "></textarea>
+      <label for="comment">Коментар:</label>
+      <textarea id="comment" name="comment" rows="4" maxlength="300" placeholder="Додаткові побажання"></textarea>
 
-    <button type="submit">Відправити замовлення</button>
-
-</form><p id="message" role="status"></p></section><script>
-document.getElementById("orderForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    if (this.checkValidity()) {
-
-        document.getElementById("message").textContent =
-        "Дякуємо за замовлення! Ми зв'яжемося з вами по телефону та електронній пошті для уточнення деталей замовлення.";
-
-        this.reset();
-    } else {
-        this.reportValidity();
-    }
-});
-</script>
+      <button type="submit">Відправити замовлення</button>
+    </form>
+    <p id="message" role="status"></p>
+  </section>
 </main>
+
 <footer class="site-footer">
   <div class="container">
     <p>© 2026 Green Farm. смт Зелене, вул. Центральна, 15</p>
     <p>+380 (67) 123-45-67 · info@greenfarm.ua · Пн–Сб, 08:00–18:00</p>
   </div>
 </footer>
+
+<script>
+
+document.getElementById("date").min = new Date().toISOString().slice(0, 10);
+document.getElementById("orderForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  document.getElementById("message").textContent = "Дякуємо! Замовлення прийнято.";
+  this.reset();
+});
+</script>
 </body>
 </html>

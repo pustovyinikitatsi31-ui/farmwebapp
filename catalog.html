@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Каталог продукції | Green Farm</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&amp;display=swap">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог продукції | Green Farm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <header class="site-header">
@@ -16,22 +16,66 @@
     <nav aria-label="Основна навігація">
       <ul>
         <li><a href="index.html">Головна</a></li>
-        <li><a href="catalog.html">Продукція</a></li>
+        <li><a href="catalog.html" aria-current="page">Продукція</a></li>
         <li><a href="cheese.html">Домашній сир</a></li>
         <li><a href="about.html">Про нас</a></li>
         <li><a href="order.html">Замовлення</a></li>
+        <li><a href="register.html">Реєстрація</a></li>
       </ul>
     </nav>
   </div>
 </header>
+
 <main class="container">
-<h1>Каталог продукції ферми Green Farm</h1><section class="grid"><article class="card"><img src="img/milk.svg" alt="Пляшка свіжого фермерського молока" width="400" height="300" loading="lazy"><h2>Фермерське молоко</h2><p>Свіже натуральне молоко.</p></article><article class="card"><img src="img/cheese.svg" alt="Круг домашнього сиру" width="400" height="300" loading="lazy"><h2>Домашній сир</h2><p>Сир власного виробництва.</p><a class="btn btn-light" href="cheese.html">Детальніше</a></article><article class="card"><img src="img/honey.svg" alt="Банка натурального меду" width="400" height="300" loading="lazy"><h2>Натуральний мед</h2><p>Мед із власної пасіки.</p></article><article class="card"><img src="img/eggs.svg" alt="Домашні курячі яйця" width="400" height="300" loading="lazy"><h2>Домашні яйця</h2><p>Яйця від курей вільного вигулу.</p></article><article class="card"><img src="img/tomato.svg" alt="Стиглі органічні помідори" width="400" height="300" loading="lazy"><h2>Органічні помідори</h2><p>Свіжі овочі без нітратів.</p></article><article class="card"><img src="img/apple.svg" alt="Свіжі яблука з саду" width="400" height="300" loading="lazy"><h2>Садові яблука</h2><p>Яблука з фермерського саду.</p></article></section><p class="back"><a href="index.html">← Повернутися на головну</a></p>
+  <h1>Каталог продукції ферми Green Farm</h1>
+  <div class="grid">
+    <article class="card">
+      <img src="img/milk.jpg" alt="Фермерське молоко" width="400" height="300" loading="lazy">
+      <h2>Фермерське молоко</h2>
+      <p>Свіже натуральне молоко.</p>
+      <p><strong>40 грн</strong></p>
+    </article>
+    <article class="card">
+      <img src="img/cheese.jpg" alt="Домашній сир" width="400" height="300" loading="lazy">
+      <h2>Домашній сир</h2>
+      <p>Сир власного виробництва.</p>
+      <p><strong>180 грн</strong></p>
+      <a class="btn btn-light" href="cheese.html">Детальніше</a>
+    </article>
+    <article class="card">
+      <img src="img/honey.jpg" alt="Натуральний мед" width="400" height="300" loading="lazy">
+      <h2>Натуральний мед</h2>
+      <p>Мед із власної пасіки.</p>
+      <p><strong>250 грн</strong></p>
+    </article>
+    <article class="card">
+      <img src="img/eggs.jpg" alt="Домашні яйця" width="400" height="300" loading="lazy">
+      <h2>Домашні яйця</h2>
+      <p>Яйця від курей вільного вигулу.</p>
+      <p><strong>70 грн</strong></p>
+    </article>
+    <article class="card">
+      <img src="img/tomato.jpg" alt="Органічні помідори" width="400" height="300" loading="lazy">
+      <h2>Органічні помідори</h2>
+      <p>Свіжі овочі без нітратів.</p>
+      <p><strong>90 грн</strong></p>
+    </article>
+    <article class="card">
+      <img src="img/apple.jpg" alt="Садові яблука" width="400" height="300" loading="lazy">
+      <h2>Садові яблука</h2>
+      <p>Яблука з фермерського саду.</p>
+      <p><strong>35 грн</strong></p>
+    </article>
+  </div>
+  <p class="back"><a href="index.html">← Повернутися на головну</a></p>
 </main>
+
 <footer class="site-footer">
   <div class="container">
     <p>© 2026 Green Farm. смт Зелене, вул. Центральна, 15</p>
     <p>+380 (67) 123-45-67 · info@greenfarm.ua · Пн–Сб, 08:00–18:00</p>
   </div>
 </footer>
+
 </body>
 </html>
