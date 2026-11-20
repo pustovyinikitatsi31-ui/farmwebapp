@@ -20,7 +20,7 @@
         <li><a href="cheese.html" aria-current="page">Домашній сир</a></li>
         <li><a href="about.html">Про нас</a></li>
         <li><a href="order.html">Замовлення</a></li>
-        <li><a href="register.html">Реєстрація</a></li>
+        <li><a href="cabinet.html">Кабінет</a></li>
       </ul>
     </nav>
   </div>
@@ -56,8 +56,9 @@
 
     <section>
       <h2>Ціна</h2>
-      <p><strong>180 грн за 1 кг</strong></p>
-      <p>Сир власного виробництва.</p>
+      <p><strong id="price">Завантаження…</strong></p>
+      <p id="desc"></p>
+      <p id="message" role="status"></p>
       <a class="btn" href="order.html">Замовити</a>
     </section>
   </article>
@@ -70,5 +71,44 @@
   </div>
 </footer>
 
+<script src="app.js"></script>
+<script>
+// Сторінка сиру: ціна й опис з GET /api/products (пошук за назвою)
+const priceEl = document.getElementById("price");
+const descEl = document.getElementById("desc");
+const msg = document.getElementById("message");
+
+async function loadCheese() {
+    // стан завантаження
+    priceEl.textContent = "Завантаження…";
+    show(msg, "", "load");
+    try {
+        const response = await fetch("/api/products");
+        if (!response.ok) throw new Error("сервер відповів " + response.status);
+        const products = await response.json();
+        const cheese = products.find(function (p) { return p.name === "Домашній сир"; });
+
+        // порожній результат
+        if (!cheese) {
+            priceEl.textContent = "Ціну уточнюйте";
+            show(msg, "Товар тимчасово відсутній у каталозі.", "load");
+            return;
+        }
+        priceEl.textContent = cheese.price + " грн за 1 " + cheese.unit;
+        descEl.textContent = cheese.description;
+    } catch (e) {
+        // стан помилки
+        priceEl.textContent = "—";
+        const text = e instanceof TypeError ? "Немає зв'язку з сервером" : "Не вдалося завантажити ціну: " + e.message;
+        show(msg, text + " ", "err");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Спробувати ще раз";
+        btn.onclick = loadCheese;
+        msg.appendChild(btn);
+    }
+}
+loadCheese();
+</script>
 </body>
 </html>

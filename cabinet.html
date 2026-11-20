@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Особистий кабінет | Green Farm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="index.html">Green Farm</a>
+    <nav aria-label="Основна навігація">
+      <ul>
+        <li><a href="index.html">Головна</a></li>
+        <li><a href="catalog.html">Продукція</a></li>
+        <li><a href="cheese.html">Домашній сир</a></li>
+        <li><a href="about.html">Про нас</a></li>
+        <li><a href="order.html">Замовлення</a></li>
+        <li><a href="cabinet.html" aria-current="page">Кабінет</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section>
+    <h1>Особистий кабінет</h1>
+    <p id="message" role="status">Завантаження…</p>
+
+    <div id="cabinet" hidden>
+      <h2>Профіль</h2>
+      <p>Ім'я: <strong id="pName"></strong></p>
+      <p>Email: <strong id="pEmail"></strong></p>
+      <p>Телефон: <strong id="pPhone"></strong></p>
+      <button type="button" id="logoutBtn">Вийти</button>
+
+      <h2>Мої замовлення</h2>
+      <p id="ordersMsg" role="status"></p>
+      <div class="grid" id="orders"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Green Farm. смт Зелене, вул. Центральна, 15</p>
+    <p>+380 (67) 123-45-67 · info@greenfarm.ua · Пн–Сб, 08:00–18:00</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+// Кабінет: профіль (GET /api/me), замовлення (GET /api/orders), видалення (DELETE /api/orders/:id)
+const msg = document.getElementById("message");
+const cabinet = document.getElementById("cabinet");
+const ordersBox = document.getElementById("orders");
+const ordersMsg = document.getElementById("ordersMsg");
+const STATUS = { new: "Нове", done: "Виконано", cancelled: "Скасовано" };
+
+document.getElementById("logoutBtn").addEventListener("click", logout);
+
+// якщо сервер відповів 401 — токен недійсний: видаляємо його й відправляємо на вхід
+function unauthorized() {
+    localStorage.removeItem("token");
+    location.href = "register.html";
+}
+
+function errorText(e, what) {
+    return e instanceof TypeError ? "Немає зв'язку з сервером" : what + ": " + e.message;
+}
+
+if (!getToken()) {
+    msg.innerHTML = 'Щоб переглянути кабінет, <a href="register.html">увійдіть або зареєструйтесь</a>.';
+} else {
+    loadCabinet();
+}
+
+// 1. Профіль
+async function loadCabinet() {
+    // стан завантаження
+    show(msg, "Завантаження…", "load");
+    try {
+        const response = await fetch("/api/me", {
+            headers: { "Authorization": "Bearer " + getToken() }
+        });
+        if (response.status === 401) return unauthorized();
+        if (!response.ok) throw new Error("сервер відповів " + response.status);
+        const me = await response.json();
+
+        document.getElementById("pName").textContent = me.name;
+        document.getElementById("pEmail").textContent = me.email;
+        document.getElementById("pPhone").textContent = me.phone;
+        show(msg, "", "load");
+        cabinet.hidden = false;
+        loadOrders();
+    } catch (e) {
+        // стан помилки
+        show(msg, errorText(e, "Не вдалося завантажити профіль") + " ", "err");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Спробувати ще раз";
+        btn.onclick = loadCabinet;
+        msg.appendChild(btn);
+    }
+}
+
+// 2. Замовлення
+async function loadOrders() {
+    // стан завантаження
+    ordersBox.innerHTML = "";
+    show(ordersMsg, "Завантаження замовлень…", "load");
+    try {
+        const response = await fetch("/api/orders", {
+            headers: { "Authorization": "Bearer " + getToken() }
+        });
+        if (response.status === 401) return unauthorized();
+        if (!response.ok) throw new Error("сервер відповів " + response.status);
+        const orders = await response.json();
+
+        // порожній результат
+        if (orders.length === 0) {
+            show(ordersMsg, "У вас ще немає замовлень.", "load");
+            return;
+        }
+        ordersBox.innerHTML = orders.map(function (o) {
+            return '<article class="card">' +
+                '<h3>Замовлення №' + esc(o.id) + '</h3>' +
+                '<p>' + esc(o.product_name) + ': ' + esc(o.quantity) + ' × ' + esc(o.unit_price) + ' грн = <strong>' + esc(o.total) + ' грн</strong></p>' +
+                '<p>Доставка: ' + esc(o.delivery_date) + ', ' + esc(o.address) + '</p>' +
+                (o.comment ? '<p>Коментар: ' + esc(o.comment) + '</p>' : '') +
+                '<p>Статус: ' + esc(STATUS[o.status] || o.status) + '</p>' +
+                '<button type="button" class="btn-light" data-id="' + esc(o.id) + '">Видалити</button>' +
+                '</article>';
+        }).join("");
+        show(ordersMsg, "", "load");
+    } catch (e) {
+        // стан помилки
+        show(ordersMsg, errorText(e, "Не вдалося завантажити замовлення") + " ", "err");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Спробувати ще раз";
+        btn.onclick = loadOrders;
+        ordersMsg.appendChild(btn);
+    }
+}
+
+// 3. Видалення замовлення (DELETE /api/orders/:id)
+ordersBox.addEventListener("click", async function (event) {
+    const btn = event.target.closest("button[data-id]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (!confirm("Видалити замовлення №" + id + "?")) return;
+
+    btn.disabled = true;
+    btn.textContent = "Видаляємо…";
+    try {
+        const response = await fetch("/api/orders/" + id, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + getToken() }
+        });
+        if (response.status === 401) return unauthorized();
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || ("сервер відповів " + response.status));
+        }
+        loadOrders();
+    } catch (e) {
+        show(ordersMsg, errorText(e, "Не вдалося видалити"), "err");
+        btn.disabled = false;
+        btn.textContent = "Видалити";
+    }
+});
+</script>
+</body>
+</html>

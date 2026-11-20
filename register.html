@@ -20,7 +20,7 @@
         <li><a href="cheese.html">Домашній сир</a></li>
         <li><a href="about.html">Про нас</a></li>
         <li><a href="order.html">Замовлення</a></li>
-        <li><a href="register.html" aria-current="page">Реєстрація</a></li>
+        <li><a href="cabinet.html">Кабінет</a></li>
       </ul>
     </nav>
   </div>
@@ -30,7 +30,7 @@
   <section class="text">
     <h1>Реєстрація</h1>
 
-    <form id="regForm" action="#" method="post">
+    <form id="regForm">
       <label for="name">Ім'я:</label>
       <input type="text" id="name" name="name" required minlength="2" placeholder="Ваше ім'я">
 
@@ -46,6 +46,19 @@
       <button type="submit">Зареєструватися</button>
     </form>
     <p id="regMsg" role="status"></p>
+
+    <h2>Вже є акаунт? Вхід</h2>
+
+    <form id="loginForm">
+      <label for="lemail">Email:</label>
+      <input type="email" id="lemail" name="email" required>
+
+      <label for="lpassword">Пароль:</label>
+      <input type="password" id="lpassword" name="password" required>
+
+      <button type="submit">Увійти</button>
+    </form>
+    <p id="loginMsg" role="status"></p>
   </section>
 </main>
 
@@ -56,12 +69,77 @@
   </div>
 </footer>
 
+<script src="app.js"></script>
 <script>
-// Лише демонстрація: без сервера показуємо підтвердження після успішної валідації
-document.getElementById("regForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-  document.getElementById("regMsg").textContent = "Реєстрація успішна!";
-  this.reset();
+// Реєстрація та вхід: дані відправляються через fetch (POST), токен зберігається в localStorage
+if (getToken()) location.href = "cabinet.html";
+
+const regForm = document.getElementById("regForm");
+const loginForm = document.getElementById("loginForm");
+
+// 1. Реєстрація — POST /api/register
+regForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    if (!regForm.checkValidity()) return regForm.reportValidity();
+
+    const btn = regForm.querySelector("button");
+    const regMsg = document.getElementById("regMsg");
+
+    show(regMsg, "Відправляємо…", "load");
+    btn.disabled = true;                 // щоб не натиснули двічі
+    btn.textContent = "Зачекайте…";
+
+    try {
+        const response = await fetch("/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(Object.fromEntries(new FormData(regForm)))
+        });
+
+        const data = await response.json();
+        // показуємо повідомлення сервера: "Такий email уже зареєстровано", "Пароль: мінімум 6 символів" тощо
+        if (!response.ok) throw new Error(data.error || ("сервер відповів " + response.status));
+
+        setToken(data.token);
+        show(regMsg, "Реєстрація успішна!", "ok");
+        setTimeout(function () { location.href = "cabinet.html"; }, 500);
+    } catch (err) {
+        show(regMsg, err.message, "err");
+        btn.disabled = false;
+        btn.textContent = "Зареєструватися";
+    }
+});
+
+// 2. Вхід — POST /api/login
+loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    if (!loginForm.checkValidity()) return loginForm.reportValidity();
+
+    const btn = loginForm.querySelector("button");
+    const loginMsg = document.getElementById("loginMsg");
+
+    show(loginMsg, "Відправляємо…", "load");
+    btn.disabled = true;
+    btn.textContent = "Зачекайте…";
+
+    try {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(Object.fromEntries(new FormData(loginForm)))
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || ("сервер відповів " + response.status));
+
+        setToken(data.token);
+        show(loginMsg, "Вхід виконано!", "ok");
+        setTimeout(function () { location.href = "cabinet.html"; }, 500);
+    } catch (err) {
+        show(loginMsg, err.message, "err");
+        btn.disabled = false;
+        btn.textContent = "Увійти";
+    }
 });
 </script>
 </body>

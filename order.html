@@ -20,7 +20,7 @@
         <li><a href="cheese.html">Домашній сир</a></li>
         <li><a href="about.html">Про нас</a></li>
         <li><a href="order.html" aria-current="page">Замовлення</a></li>
-        <li><a href="register.html">Реєстрація</a></li>
+        <li><a href="cabinet.html">Кабінет</a></li>
       </ul>
     </nav>
   </div>
@@ -30,28 +30,22 @@
   <section class="text">
     <h1>Замовлення фермерської продукції</h1>
 
-    <form id="orderForm" action="#" method="post">
+    <form id="orderForm" hidden>
       <label for="name">Ім'я:</label>
-      <input type="text" id="name" name="name" required minlength="2" placeholder="Введіть ваше ім'я">
+      <input type="text" id="name" name="name" readonly required minlength="2" placeholder="Введіть ваше ім'я">
 
       <label for="phone">Телефон:</label>
-      <input type="tel" id="phone" name="phone" required pattern="[0-9]{10,13}" placeholder="380XXXXXXXXX">
+      <input type="tel" id="phone" name="phone" readonly required pattern="[0-9]{10,13}" placeholder="380XXXXXXXXX">
 
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required placeholder="example@gmail.com">
+      <input type="email" id="email" name="email" readonly required placeholder="example@gmail.com">
 
       <label for="address">Адреса доставки:</label>
       <input type="text" id="address" name="address" required minlength="10" placeholder="Місто, вулиця, будинок, квартира">
 
       <label for="product">Оберіть продукцію:</label>
       <select id="product" name="product" required>
-        <option value="">-- Оберіть товар --</option>
-        <option value="1">Фермерське молоко — 40 грн</option>
-        <option value="2">Домашній сир — 180 грн</option>
-        <option value="3">Натуральний мед — 250 грн</option>
-        <option value="4">Домашні яйця — 70 грн</option>
-        <option value="5">Органічні помідори — 90 грн</option>
-        <option value="6">Садові яблука — 35 грн</option>
+        <option value="">Завантаження…</option>
       </select>
 
       <label for="quantity">Кількість:</label>
@@ -63,9 +57,10 @@
       <label for="comment">Коментар:</label>
       <textarea id="comment" name="comment" rows="4" maxlength="300" placeholder="Додаткові побажання"></textarea>
 
-      <button type="submit">Відправити замовлення</button>
+      <button type="submit" id="submitBtn">Відправити замовлення</button>
     </form>
-    <p id="message" role="status"></p>
+
+    <p id="message" role="status">Завантаження…</p>
   </section>
 </main>
 
@@ -76,13 +71,107 @@
   </div>
 </footer>
 
+<script src="app.js"></script>
 <script>
+// Форма замовлення: профіль і товари отримуємо через fetch,
+// саме замовлення відправляємо через fetch методом POST
+const form = document.getElementById("orderForm");
+const msg = document.getElementById("message");
+const submitBtn = document.getElementById("submitBtn");
 
-document.getElementById("date").min = new Date().toISOString().slice(0, 10);
-document.getElementById("orderForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-  document.getElementById("message").textContent = "Дякуємо! Замовлення прийнято.";
-  this.reset();
+// 1. Якщо користувач не увійшов — показуємо посилання на вхід
+if (!getToken()) {
+    msg.innerHTML = 'Щоб зробити замовлення, <a href="register.html">увійдіть або зареєструйтесь</a>.';
+} else {
+    loadForm();
+}
+
+// 2. Завантажуємо профіль (GET /api/me) і товари (GET /api/products)
+async function loadForm() {
+    show(msg, "Завантаження даних…", "load");
+
+    try {
+        const meResponse = await fetch("/api/me", {
+            headers: { "Authorization": "Bearer " + getToken() }
+        });
+
+        // токен прострочений або неправильний
+        if (meResponse.status === 401) {
+            localStorage.removeItem("token");
+            location.href = "register.html";
+            return;
+        }
+        if (!meResponse.ok) throw new Error("сервер відповів " + meResponse.status);
+        const me = await meResponse.json();
+
+        const productsResponse = await fetch("/api/products");
+        if (!productsResponse.ok) throw new Error("сервер відповів " + productsResponse.status);
+        const products = await productsResponse.json();
+
+        document.getElementById("name").value = me.name;
+        document.getElementById("phone").value = me.phone;
+        document.getElementById("email").value = me.email;
+
+        document.getElementById("product").innerHTML =
+            '<option value="">-- Оберіть товар --</option>' +
+            products.map(function (p) {
+                return '<option value="' + p.product_id + '">' + esc(p.name) + ' — ' + esc(p.price) + ' грн</option>';
+            }).join("");
+
+        document.getElementById("date").min = today();
+        show(msg, "", "load");
+        form.hidden = false;
+    } catch (e) {
+        show(msg, "Не вдалося завантажити дані: " + e.message, "err");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Спробувати ще раз";
+        btn.onclick = loadForm;
+        msg.appendChild(btn);
+    }
+}
+
+// 3. Відправка замовлення (POST /api/orders)
+form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    if (!form.checkValidity()) return form.reportValidity();
+
+    // блокуємо кнопку, щоб не відправити замовлення двічі
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Відправляємо…";
+    show(msg, "Відправляємо замовлення…", "load");
+
+    try {
+        const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + getToken()
+            },
+            body: JSON.stringify({
+                product_id: Number(document.getElementById("product").value),
+                quantity: Number(document.getElementById("quantity").value),
+                address: document.getElementById("address").value,
+                delivery_date: document.getElementById("date").value,
+                comment: document.getElementById("comment").value
+            })
+        });
+
+        const data = await response.json();
+        // сервер повертає { error: "..." } — показуємо цей текст користувачу
+        if (!response.ok) throw new Error(data.error || ("сервер відповів " + response.status));
+
+        show(msg, "Дякуємо! Замовлення №" + data.id + " прийнято. Переглянути його можна в кабінеті.", "ok");
+        document.getElementById("address").value = "";
+        document.getElementById("comment").value = "";
+        document.getElementById("product").value = "";
+    } catch (e) {
+        show(msg, "Помилка: " + e.message, "err");
+    } finally {
+        // у будь-якому разі повертаємо кнопку в робочий стан
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Відправити замовлення";
+    }
 });
 </script>
 </body>

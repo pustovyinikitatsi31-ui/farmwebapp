@@ -20,7 +20,7 @@
         <li><a href="cheese.html">Домашній сир</a></li>
         <li><a href="about.html">Про нас</a></li>
         <li><a href="order.html">Замовлення</a></li>
-        <li><a href="register.html">Реєстрація</a></li>
+        <li><a href="cabinet.html">Кабінет</a></li>
       </ul>
     </nav>
   </div>
@@ -28,45 +28,8 @@
 
 <main class="container">
   <h1>Каталог продукції ферми Green Farm</h1>
-  <div class="grid">
-    <article class="card">
-      <img src="img/milk.jpg" alt="Фермерське молоко" width="400" height="300" loading="lazy">
-      <h2>Фермерське молоко</h2>
-      <p>Свіже натуральне молоко.</p>
-      <p><strong>40 грн</strong></p>
-    </article>
-    <article class="card">
-      <img src="img/cheese.jpg" alt="Домашній сир" width="400" height="300" loading="lazy">
-      <h2>Домашній сир</h2>
-      <p>Сир власного виробництва.</p>
-      <p><strong>180 грн</strong></p>
-      <a class="btn btn-light" href="cheese.html">Детальніше</a>
-    </article>
-    <article class="card">
-      <img src="img/honey.jpg" alt="Натуральний мед" width="400" height="300" loading="lazy">
-      <h2>Натуральний мед</h2>
-      <p>Мед із власної пасіки.</p>
-      <p><strong>250 грн</strong></p>
-    </article>
-    <article class="card">
-      <img src="img/eggs.jpg" alt="Домашні яйця" width="400" height="300" loading="lazy">
-      <h2>Домашні яйця</h2>
-      <p>Яйця від курей вільного вигулу.</p>
-      <p><strong>70 грн</strong></p>
-    </article>
-    <article class="card">
-      <img src="img/tomato.jpg" alt="Органічні помідори" width="400" height="300" loading="lazy">
-      <h2>Органічні помідори</h2>
-      <p>Свіжі овочі без нітратів.</p>
-      <p><strong>90 грн</strong></p>
-    </article>
-    <article class="card">
-      <img src="img/apple.jpg" alt="Садові яблука" width="400" height="300" loading="lazy">
-      <h2>Садові яблука</h2>
-      <p>Яблука з фермерського саду.</p>
-      <p><strong>35 грн</strong></p>
-    </article>
-  </div>
+  <div class="grid" id="catalog"></div>
+  <p id="message" role="status">Завантаження…</p>
   <p class="back"><a href="index.html">← Повернутися на головну</a></p>
 </main>
 
@@ -77,5 +40,48 @@
   </div>
 </footer>
 
+<script src="app.js"></script>
+<script>
+// Каталог: усі товари з GET /api/products
+const catalog = document.getElementById("catalog");
+const msg = document.getElementById("message");
+
+async function loadCatalog() {
+    // стан завантаження
+    catalog.innerHTML = "";
+    show(msg, "Завантаження…", "load");
+    try {
+        const response = await fetch("/api/products");
+        if (!response.ok) throw new Error("сервер відповів " + response.status);
+        const products = await response.json();
+
+        // порожній результат
+        if (products.length === 0) {
+            show(msg, "У каталозі поки немає товарів.", "load");
+            return;
+        }
+        catalog.innerHTML = products.map(function (p) {
+            return '<article class="card">' +
+                '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" width="400" height="300" loading="lazy">' +
+                '<h2>' + esc(p.name) + '</h2>' +
+                '<p>' + esc(p.description) + '</p>' +
+                '<p><strong>' + esc(p.price) + ' грн</strong></p>' +
+                (p.name === "Домашній сир" ? '<a class="btn btn-light" href="cheese.html">Детальніше</a>' : '') +
+                '</article>';
+        }).join("");
+        show(msg, "", "load");
+    } catch (e) {
+        // стан помилки
+        const text = e instanceof TypeError ? "Немає зв'язку з сервером" : "Не вдалося завантажити каталог: " + e.message;
+        show(msg, text + " ", "err");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Спробувати ще раз";
+        btn.onclick = loadCatalog;
+        msg.appendChild(btn);
+    }
+}
+loadCatalog();
+</script>
 </body>
 </html>

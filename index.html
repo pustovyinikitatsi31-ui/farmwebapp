@@ -20,7 +20,7 @@
         <li><a href="cheese.html">Домашній сир</a></li>
         <li><a href="about.html">Про нас</a></li>
         <li><a href="order.html">Замовлення</a></li>
-        <li><a href="register.html">Реєстрація</a></li>
+        <li><a href="cabinet.html">Кабінет</a></li>
       </ul>
     </nav>
   </div>
@@ -42,26 +42,8 @@
 
   <section>
     <h2>Хіти продажів</h2>
-    <div class="grid">
-    <article class="card">
-      <img src="img/milk.jpg" alt="Фермерське молоко" width="400" height="300" loading="lazy">
-      <h3>Фермерське молоко</h3>
-      <p>Свіже натуральне молоко.</p>
-      <p><strong>40 грн</strong></p>
-    </article>
-    <article class="card">
-      <img src="img/cheese.jpg" alt="Домашній сир" width="400" height="300" loading="lazy">
-      <h3>Домашній сир</h3>
-      <p>Сир власного виробництва.</p>
-      <p><strong>180 грн</strong></p>
-    </article>
-    <article class="card">
-      <img src="img/honey.jpg" alt="Натуральний мед" width="400" height="300" loading="lazy">
-      <h3>Натуральний мед</h3>
-      <p>Мед із власної пасіки.</p>
-      <p><strong>250 грн</strong></p>
-    </article>
-    </div>
+    <div class="grid" id="hits"></div>
+    <p id="hitsMsg" role="status">Завантаження…</p>
   </section>
 </main>
 
@@ -72,5 +54,47 @@
   </div>
 </footer>
 
+<script src="app.js"></script>
+<script>
+// Головна: «Хіти продажів» — перші 3 товари з GET /api/products
+const hits = document.getElementById("hits");
+const hitsMsg = document.getElementById("hitsMsg");
+
+async function loadHits() {
+    // стан завантаження
+    hits.innerHTML = "";
+    show(hitsMsg, "Завантаження…", "load");
+    try {
+        const response = await fetch("/api/products");
+        if (!response.ok) throw new Error("сервер відповів " + response.status);
+        const products = await response.json();
+
+        // порожній результат
+        if (products.length === 0) {
+            show(hitsMsg, "У каталозі поки немає товарів.", "load");
+            return;
+        }
+        hits.innerHTML = products.slice(0, 3).map(function (p) {
+            return '<article class="card">' +
+                '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" width="400" height="300" loading="lazy">' +
+                '<h3>' + esc(p.name) + '</h3>' +
+                '<p>' + esc(p.description) + '</p>' +
+                '<p><strong>' + esc(p.price) + ' грн</strong></p>' +
+                '</article>';
+        }).join("");
+        show(hitsMsg, "", "load");
+    } catch (e) {
+        // стан помилки
+        const text = e instanceof TypeError ? "Немає зв'язку з сервером" : "Не вдалося завантажити товари: " + e.message;
+        show(hitsMsg, text + " ", "err");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Спробувати ще раз";
+        btn.onclick = loadHits;
+        hitsMsg.appendChild(btn);
+    }
+}
+loadHits();
+</script>
 </body>
 </html>

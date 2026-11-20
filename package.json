@@ -1,0 +1,17 @@
+{
+  "name": "green-farm",
+  "version": "1.0.0",
+  "description": "Фермерський магазин Green Farm: Express + вбудована SQLite (node:sqlite), JWT",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
