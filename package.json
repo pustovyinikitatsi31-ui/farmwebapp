@@ -7,7 +7,12 @@
     "node": ">=22.13"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test unit.test.js api.test.js",
+    "test:unit": "node --test unit.test.js",
+    "test:api": "node --test api.test.js",
+    "test:coverage": "node --test --experimental-test-coverage unit.test.js",
+    "test:report": "node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=spec --test-reporter-destination=test-report.txt unit.test.js api.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -1,0 +1,182 @@
+
+GET /api/products
+Статус-код: 200
+Відповідь: {
+  "всього елементів": 6,
+  "перший елемент": {
+    "product_id": 1,
+    "name": "Фермерське молоко",
+    "description": "Свіже натуральне молоко.",
+    "price": 40,
+    "unit": "л",
+    "image": "img/milk.jpg",
+    "category_id": 1,
+    "category": "Молочна продукція"
+  }
+}
+[32m✔ 1. GET /api/products → 200 і масив товарів з полями [90m(81.579ms)[39m[39m
+
+GET /api/products/999999
+Статус-код: 404
+Відповідь: {
+  "error": "Товар не знайдено"
+}
+[32m✔ 2. GET /api/products/999999 → 404 з полем error [90m(5.4456ms)[39m[39m
+
+POST /api/register
+Тіло запиту: {"name":"Автотест","email":"autotest_1795831306317@example.com","phone":"380671234567","password":"***"}
+Статус-код: 201
+Відповідь: {
+  "token": "eyJhbGciOiJIUzI...",
+  "user": {
+    "id": 9,
+    "name": "Автотест",
+    "email": "autotest_1795831306317@example.com",
+    "phone": "380671234567",
+    "role": "user"
+  }
+}
+[32m✔ 3. POST /api/register (коректні дані) → 201, токен, без пароля [90m(77.7654ms)[39m[39m
+
+POST /api/register
+Тіло запиту: {"name":"Автотест","email":"autotest_1795831306317@example.com","phone":"380671234567","password":"***"}
+Статус-код: 409
+Відповідь: {
+  "error": "Такий email уже зареєстровано"
+}
+[32m✔ 4. POST /api/register (повторний email) → 409 [90m(4.1414ms)[39m[39m
+
+POST /api/login
+Тіло запиту: {"email":"autotest_1795831306317@example.com","password":"***"}
+Статус-код: 401
+Відповідь: {
+  "error": "Невірний email або пароль"
+}
+[32m✔ 5. POST /api/login (неправильний пароль) → 401 [90m(70.6874ms)[39m[39m
+
+GET /api/me
+Статус-код: 401
+Відповідь: {
+  "error": "Потрібна авторизація"
+}
+
+GET /api/me
+Статус-код: 200
+Відповідь: {
+  "id": 9,
+  "name": "Автотест",
+  "email": "autotest_1795831306317@example.com",
+  "phone": "380671234567",
+  "role": "user"
+}
+[32m✔ 6. GET /api/me: без токена → 401, з токеном → 200 [90m(5.4495ms)[39m[39m
+
+POST /api/orders
+Тіло запиту: {"product_id":1,"quantity":2,"address":"Київ, вул. Хрещатик, 1","delivery_date":"2026-12-01"}
+Статус-код: 201
+Відповідь: {
+  "id": 7,
+  "user_id": 9,
+  "user_email": "autotest_1795831306317@example.com",
+  "product_id": 1,
+  "product_name": "Фермерське молоко",
+  "quantity": 2,
+  "unit_price": 40,
+  "total": 80,
+  "address": "Київ, вул. Хрещатик, 1",
+  "delivery_date": "2026-12-01",
+  "comment": "",
+  "status": "new",
+  "created_at": "2026-11-28 02:01:46"
+}
+[32m✔ 7. POST /api/orders (коректні дані) → 201, сума = кількість × ціна [90m(11.0707ms)[39m[39m
+
+POST /api/orders
+Тіло запиту: {"product_id":1,"quantity":0,"address":"Київ, вул. Хрещатик, 1","delivery_date":"2026-12-01"}
+Статус-код: 400
+Відповідь: {
+  "error": "Кількість: ціле число від 1 до 100"
+}
+
+POST /api/orders
+Тіло запиту: {"product_id":1,"quantity":2,"address":"Київ, вул. Хрещатик, 1","delivery_date":"2026-12-01"}
+Статус-код: 401
+Відповідь: {
+  "error": "Потрібна авторизація"
+}
+[32m✔ 8. POST /api/orders (кількість 0) → 400, без токена → 401 [90m(9.1103ms)[39m[39m
+
+DELETE /api/orders/7
+Статус-код: 204
+Відповідь: (порожня)
+
+GET /api/orders/7
+Статус-код: 404
+Відповідь: {
+  "error": "Замовлення не знайдено"
+}
+[32m✔ 9. DELETE /api/orders/:id → 204, повторний GET → 404 [90m(12.1116ms)[39m[39m
+
+1. checkUser: коректні дані проходять, некоректні дають 400
+  S.checkUser(ok) → OK: {"name":"Іван","email":"ivan@example.com","phone":"380671234567","password":"***"}
+  S.checkUser({ ...ok, name: 'І' }) → 400: Ім'я: мінімум 2 символи
+  S.checkUser({ ...ok, email: 'ivan@' }) → 400: Email: некоректний формат
+  S.checkUser({ ...ok, phone: '12345' }) → 400: Телефон: від 10 до 13 цифр
+  S.checkUser({ ...ok, password: '12345' }) → 400: Пароль: мінімум 6 символів
+
+2. checkOrder: кількість 1–100, адреса, дата не в минулому
+  S.checkOrder(ok) → OK: {"product_id":1,"unit_price":40,"quantity":2,"address":"Київ, вул. Хрещатик, 1","delivery_date":"2026-12-01","comment":""}
+  S.checkOrder({ ...ok, quantity: 0 }, false) → 400: Кількість: ціле число від 1 до 100
+  S.checkOrder({ ...ok, quantity: 101 }, false) → 400: Кількість: ціле число від 1 до 100
+  S.checkOrder({ ...ok, address: 'коротка' }, false) → 400: Адреса: мінімум 10 символів
+  S.checkOrder({ ...ok, delivery_date: daysFromNow(-1) }, false) → 400: Дата: не може бути в минулому
+  S.checkOrder({ ...ok, product_id: 999999 }, false) → 400: Товар: не знайдено
+
+3. checkProduct: ціна > 0, категорія існує, шлях до фото img/...
+  S.checkProduct(ok) → OK: {"name":"Козяче молоко","price":60,"category_id":1,"description":"","unit":"шт","image":"img/goat.jpg"}
+  S.checkProduct({ ...ok, price: 0 }) → 400: Ціна: число більше 0 і не більше 100000
+  S.checkProduct({ ...ok, category_id: 999 }) → 400: Категорія: не знайдено
+  S.checkProduct({ ...ok, image: 'http://evil.com/a.jpg' }) → 400: Зображення: шлях виду img/назва.jpg
+
+4. parseId та validDate
+  S.parseId('5') → OK: 5
+  S.parseId("0") → 400: Некоректний id
+  S.parseId("-1") → 400: Некоректний id
+  S.parseId("abc") → 400: Некоректний id
+  S.parseId("1.5") → 400: Некоректний id
+
+5. makeToken та publicUser: токен JWT на 2 години, пароль не віддається
+  JWT makeToken({ id: 7, role: admin }) → OK: {"sub":7,"role":"admin","iat":1795831306,"exp":1795838506}
+  S.publicUser(...) → OK: {"id":1,"name":"А","email":"a@b.c","phone":"1234567890","role":"user"}
+
+6. auth та adminOnly: перевірка токена і ролі
+  auth(без заголовка) → 401: Потрібна авторизація
+  auth(сміттєвий токен) → 401: Токен недійсний або прострочений
+  auth(токен неіснуючого користувача) → 401: Користувача не знайдено
+  auth(дійсний токен) → OK, req.user = {"id":1,"name":"Тест","email":"unit@example.com","phone":"380671234567","role":"user"}
+  adminOnly(role=user) → 403: Недостатньо прав
+  adminOnly(role=admin) → OK (next() без помилки)
+[32m✔ 1. checkUser: коректні дані проходять, некоректні дають 400 [90m(6.1402ms)[39m[39m
+[32m✔ 2. checkOrder: кількість 1–100, адреса, дата не в минулому [90m(6.0548ms)[39m[39m
+[32m✔ 3. checkProduct: ціна > 0, категорія існує, шлях до фото img/... [90m(4.1078ms)[39m[39m
+[32m✔ 4. parseId та validDate [90m(3.4823ms)[39m[39m
+[32m✔ 5. makeToken та publicUser: токен JWT на 2 години, пароль не віддається [90m(6.6077ms)[39m[39m
+[32m✔ 6. auth та adminOnly: перевірка токена і ролі [90m(5.529ms)[39m[39m
+[34mℹ tests 15[39m
+[34mℹ suites 0[39m
+[34mℹ pass 15[39m
+[34mℹ fail 0[39m
+[34mℹ cancelled 0[39m
+[34mℹ skipped 0[39m
+[34mℹ todo 0[39m
+[34mℹ duration_ms 633.2542[39m
+[34mℹ start of coverage report
+ℹ ----------------------------------------------------------------------------------------------------------------------
+ℹ file        | [31mline %[34m | [31mbranch %[34m | [31mfuncs %[34m | uncovered lines
+ℹ ----------------------------------------------------------------------------------------------------------------------
+ℹ [33mserver.js  [34m | [33m 56.80[34m | [33m   80.00[34m | [32m 100.00[34m | 218-219 221-234 236-247 249-251 253-256 258-262 264-270 272-276 278-288 …
+ℹ ----------------------------------------------------------------------------------------------------------------------
+ℹ all files   | [33m 56.80[34m | [33m   80.00[34m | [32m 100.00[34m | 
+ℹ ----------------------------------------------------------------------------------------------------------------------
+ℹ end of coverage report
+[39m

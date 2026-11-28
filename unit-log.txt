@@ -1,0 +1,40 @@
+
+1. checkUser: коректні дані проходять, некоректні дають 400
+  S.checkUser(ok) → OK: {"name":"Іван","email":"ivan@example.com","phone":"380671234567","password":"***"}
+  S.checkUser({ ...ok, name: 'І' }) → 400: Ім'я: мінімум 2 символи
+  S.checkUser({ ...ok, email: 'ivan@' }) → 400: Email: некоректний формат
+  S.checkUser({ ...ok, phone: '12345' }) → 400: Телефон: від 10 до 13 цифр
+  S.checkUser({ ...ok, password: '12345' }) → 400: Пароль: мінімум 6 символів
+
+2. checkOrder: кількість 1–100, адреса, дата не в минулому
+  S.checkOrder(ok) → OK: {"product_id":1,"unit_price":40,"quantity":2,"address":"Київ, вул. Хрещатик, 1","delivery_date":"2026-12-01","comment":""}
+  S.checkOrder({ ...ok, quantity: 0 }, false) → 400: Кількість: ціле число від 1 до 100
+  S.checkOrder({ ...ok, quantity: 101 }, false) → 400: Кількість: ціле число від 1 до 100
+  S.checkOrder({ ...ok, address: 'коротка' }, false) → 400: Адреса: мінімум 10 символів
+  S.checkOrder({ ...ok, delivery_date: daysFromNow(-1) }, false) → 400: Дата: не може бути в минулому
+  S.checkOrder({ ...ok, product_id: 999999 }, false) → 400: Товар: не знайдено
+
+3. checkProduct: ціна > 0, категорія існує, шлях до фото img/...
+  S.checkProduct(ok) → OK: {"name":"Козяче молоко","price":60,"category_id":1,"description":"","unit":"шт","image":"img/goat.jpg"}
+  S.checkProduct({ ...ok, price: 0 }) → 400: Ціна: число більше 0 і не більше 100000
+  S.checkProduct({ ...ok, category_id: 999 }) → 400: Категорія: не знайдено
+  S.checkProduct({ ...ok, image: 'http://evil.com/a.jpg' }) → 400: Зображення: шлях виду img/назва.jpg
+
+4. parseId та validDate
+  S.parseId('5') → OK: 5
+  S.parseId("0") → 400: Некоректний id
+  S.parseId("-1") → 400: Некоректний id
+  S.parseId("abc") → 400: Некоректний id
+  S.parseId("1.5") → 400: Некоректний id
+
+5. makeToken та publicUser: токен JWT на 2 години, пароль не віддається
+  JWT makeToken({ id: 7, role: admin }) → OK: {"sub":7,"role":"admin","iat":1795831306,"exp":1795838506}
+  S.publicUser(...) → OK: {"id":1,"name":"А","email":"a@b.c","phone":"1234567890","role":"user"}
+
+6. auth та adminOnly: перевірка токена і ролі
+  auth(без заголовка) → 401: Потрібна авторизація
+  auth(сміттєвий токен) → 401: Токен недійсний або прострочений
+  auth(токен неіснуючого користувача) → 401: Користувача не знайдено
+  auth(дійсний токен) → OK, req.user = {"id":1,"name":"Тест","email":"unit@example.com","phone":"380671234567","role":"user"}
+  adminOnly(role=user) → 403: Недостатньо прав
+  adminOnly(role=admin) → OK (next() без помилки)
